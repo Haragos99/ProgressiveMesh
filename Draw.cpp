@@ -13,19 +13,6 @@ void MyViewer::draw() {
         drawControlNet();
 
 
-
-
-    glDisable(GL_LIGHTING);
-    glColor3d(1, 0, 0);
-    glPointSize(50.0);
-    glBegin(GL_POINTS);
-    glVertex3dv(nt.data());
-    glEnd();
-    glEnable(GL_LIGHTING);
-
-    if (model_type == ModelType::Bspline&& show_control_points)
-        bs.draw();
-
     if (transparent) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -34,15 +21,10 @@ void MyViewer::draw() {
         glDisable(GL_BLEND);
     }
 
-    if (show_skelton)
-        if (!axes.shown)
-        {
-            sk.makefalse(sk);
-        }
+   
     
     if (model_type == ModelType::SKELTON|| model_type == ModelType::INVERZ)
     {
-        drawSkleton();
         target.draw();
     }
     glPolygonMode(GL_FRONT_AND_BACK, !show_solid && show_wireframe ? GL_LINE : GL_FILL);
@@ -75,58 +57,6 @@ void MyViewer::draw() {
                     glColor3dv(meanMapColor(mesh.data(v).mean));
                 else if (visualization == Visualization::SLICING)
                     glTexCoord1d(mesh.point(v) | slicing_dir * slicing_scaling);
-                else if (visualization == Visualization::WEIGH) //Itt adjuk meg a súlyokat
-                {
-
-                    Vec color = Vec(0, 0, 0);
-                    for (int i = 0; i < b.size(); i++)
-                    {
-                        if (mesh.data(v).weigh[i] != 0)
-                        {
-                            color += (mesh.data(v).weigh[i] * b[i].getColor());
-
-                        }
-
-
-
-                    }
-                    if (transparent) {
-                        glColor4d(color.x, color.y, color.z, 0.5);
-                    }
-                    else {
-                        glColor3d(color.x,color.y,color.z);
-                    }
-                }
-                else if (visualization == Visualization::WEIGH2)
-                {
-                    if (wi == b.size())
-                    {
-                        wi = 0;
-                    }
-                    Vec color = mesh.data(v).weigh[wi] * (b[wi].getColor());
-
-                    if (transparent) {
-                        glColor4d(color.x, color.y, color.z, 0.5);
-                    }
-                    else {
-                        glColor3d(color.x, color.y, color.z);
-                    }
-                }
-                if (_homework)
-                {
-                    bool found = false;
-                    for (const auto& entry : sortedMap) {
-                        if (entry.first == f) {
-                            found = true;
-                            glColor3d(1,0,0);
-                            break; // Value found, exit the loop
-                        }
-                        else
-                        {
-                            glColor3d(0, 1, 0);
-                        }
-                    }
-                }
                 glNormal3dv(mesh.normal(v).data());
                 glVertex3dv(mesh.point(v).data());
 
@@ -172,44 +102,8 @@ void MyViewer::draw() {
     glEnable(GL_DEPTH_TEST);
 }
 
-/// <summary>
-/// ezt rajzoljuk ku
-/// </summary>
-void MyViewer::drawSkleton()
-{
 
-    glPointSize(30.0);
-    glColor3d(0.3, 0.0, 1.0);
-    glLineWidth(200.0);
-    int i = 0;
 
-    for (const auto& p : b)
-    {
-        if (i < b.size())
-        {
-            glBegin(GL_LINES);
-            if (transparent)
-            {
-                double color = 0.8;
-                glColor3d(p.x* color, p.y* color, p.z* color);
-            }
-            else
-            {
-                double color = 0.8;
-                glColor3d(p.x, p.y, p.z);
-            }
-           
-            glVertex3dv(p.start);
-            glVertex3dv(p.End);
-            glEnd();
-        }
-        i++;
-
-    }
-
-    sk.drawchild(sk);
-
-}
 
 
 void MyViewer::drawControlNet() const {

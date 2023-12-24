@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
-#include "Bone.h"
-#include "Bspline.h"
+
+
 
 #ifdef BETTER_MEAN_CURVATURE
 #include "Eigen/Eigenvalues"
@@ -389,9 +389,6 @@ void MyViewer::updateMesh(bool update_mean_range) {
   if (model_type == ModelType::BEZIER_SURFACE)
     generateMesh(50);
 
-
-  if (model_type == ModelType::Bspline)
-      generateBSMesh(50);
   mesh.request_face_normals(); mesh.request_vertex_normals();
   mesh.update_face_normals();
 #ifdef USE_JET_FITTING
@@ -486,171 +483,9 @@ void MyViewer::init() {
 
 
 
-void MyViewer::Rotate()
-{
-
-    
-    auto dlg = std::make_unique<QDialog>(this);
-    auto* hb1 = new QHBoxLayout,
-        * hb2 = new QHBoxLayout,
-        * hb3 = new QHBoxLayout,
-        * hb4 = new QHBoxLayout;
-    auto* vb = new QVBoxLayout;
-
-    auto* text_H = new QLabel(tr("X: "));
-    auto* text_B = new QLabel(tr("Y: "));
-    auto* text_P = new QLabel(tr("Z: "));
-    auto* sb_H = new QDoubleSpinBox;
-    auto* sb_B = new QDoubleSpinBox;
-    auto* sb_P = new QDoubleSpinBox;
-    auto* cancel = new QPushButton(tr("Cancel"));
-    auto* ok = new QPushButton(tr("Ok"));
-    connect(cancel, SIGNAL(pressed()), dlg.get(), SLOT(reject()));
-    connect(ok, SIGNAL(pressed()), dlg.get(), SLOT(accept()));
-    ok->setDefault(true);
-
-    sb_H->setRange(-360, 360);
-    sb_P->setRange(-360, 360);
-    sb_B->setRange(-360, 360);
-    hb1->addWidget(text_H);
-    hb1->addWidget(sb_H);
-    hb2->addWidget(text_P);
-    hb2->addWidget(sb_P);
-    hb3->addWidget(text_B);
-    hb3->addWidget(sb_B);
-    hb4->addWidget(cancel);
-    hb4->addWidget(ok);
-    vb->addLayout(hb1);
-    vb->addLayout(hb2);
-    vb->addLayout(hb3);
-    vb->addLayout(hb4);
-
-    dlg->setWindowTitle(tr("Rotate"));
-    dlg->setLayout(vb);
-
-    if(dlg->exec() == QDialog::Accepted) {
-        double hr = sb_H->value();
-        double pr = sb_P->value();
-        double br = sb_B->value();
-        Vec angles = Vec(hr,pr,br);
-        angels = angles;
-        rotation = angles;
-        Tree* to = sk.searchbyid(sk, selected_vertex);
-       // to->angel += angles;
-    
-        int des = -1;
-        getallpoints(*to);
-        std::vector<Vec> old = selected_points_storage;
-        selected_points_storage.clear();
-     
-         // itt vátoztatjuk meg a kordinátát
-     
-        sk.change_all_rotason(*to, to->point, angles);
-        sk.used_points(*to);
-        getallpoints(*to);
-        std::vector<Vec> newp = selected_points_storage;
-        selected_points_storage.clear();
-        for (int i = 0; i < b.size(); i++)
-        {
-            Vec rotason_point;
-            for (int j = 0; j < old.size(); j++)
-            {
-                if (b[i].start == old[j])
-                {
-                    b[i].start = newp[j];
-                    des = i;
-                }
-                if (b[i].End == old[j])
-                {
-                    b[i].End = newp[j];
-                    rotason_point = newp[j];
-                   // des = i;
-                
-                }
-            }
-            
-            if (des != -1)
-            {
-                //Vec dif = newp[des] - old[des];
-
-                /// <summary>
-                /// EULER SZÖGEK MEG CSINÁLÁSA
-                /// </summary>
-                /*
-                if (isweight)
-                {
-                    Tree* to2 = sk.searchbyid(sk, des);
-                    Vec p = to2->point;
-                    Vec p2= to->point;
-                    animate_mesh(angles, des, to->point);
-                    
-                }
-                */
-                //b[to->id].M = to->mymatrix;
-                Tree* s = sk.searchbyid(sk, des+1);
-                b[des].M = s->mymatrix;
-                des = -1;
-            }
-            
-
-        }
-        animate_mesh();
-        set_bone_matrix();
-        sk.set_deafult_matrix(sk);
-        newp.clear();
-        old.clear();
-        update();
-    }
-     
-}
-
-void MyViewer::selectedvert()
-{
-
-    if (axes.shown && model_type == ModelType::MESH) {
-        auto v = MyMesh::VertexHandle(selected_vertex);
-        auto selcted_point = mesh.data(v);
-        auto dlg = std::make_unique<QDialog>(this);
-        auto* hb1 = new QHBoxLayout,
-            * hb2 = new QHBoxLayout,
-            * hb3 = new QHBoxLayout;
-        auto* vb = new QVBoxLayout;
-
-       
-        for (int i = 0; i < selcted_point.weigh.size(); i++)
-        {
-            auto color = b[i].getColor()*255;
-            QColor rgb(color[0], color[1], color[2]);
-            QString style = QString("QLabel { background-color : rgb(%1, %2, %3) }").arg(rgb.red()).arg(rgb.green()).arg(rgb.blue());
-
-            auto* text_H = new QLabel(tr("X: "));
-            auto* text_b = new QLabel(tr("X: "));
-            text_H->setStyleSheet(style);
-            std::string s = std::to_string(i) + " :" + std::to_string(selcted_point.distance[i]);
-            text_H->setText(s.c_str());
-
-            text_b->setStyleSheet(style);
-            std::string se = std::to_string(i) + " :" + std::to_string(selcted_point.weigh[i]);
-            text_b->setText(se.c_str());
-
-            hb1->addWidget(text_H);
-
-            hb2->addWidget(text_b);
-        }
-
-        vb->addLayout(hb1);
-        vb->addLayout(hb2);
-        vb->addLayout(hb3);
-
-        dlg->setWindowTitle(tr("Data of vertex"));
-        dlg->setLayout(vb);
-
-        if (dlg->exec() == QDialog::Accepted) {
 
 
-        }
-    }
-}
+
 
 float MyViewer::ErrorDistance(MyMesh::VertexHandle p1, MyMesh::VertexHandle p2, MyMesh::Point newp)
 {
@@ -823,45 +658,7 @@ void  MyViewer::putVertexes(MyMesh::VertexHandle p1, MyMesh::VertexHandle p2, in
 
 }
 
-void MyViewer::generateBSMesh(size_t resolution)
-{
-    bs.calculate_points();
-    mesh.clear();
-    mesh.request_vertex_normals();
-    std::vector<MyMesh::VertexHandle> handles, tri;
-    //size_t n = degree[0], m = degree[1];
 
-    std::vector<double> coeff_u, coeff_v;
-    for (size_t i = 0; i < resolution; ++i) {
-        double u = (double)i / (double)(resolution - 1);
-        for (size_t j = 0; j < resolution; ++j) {
-            double v = (double)j / (double)(resolution - 1);
-            VectorMatrix der;
-            Vec p = bs.eval(u, v,2,der);
-            auto vertex = mesh.add_vertex(Vector(static_cast<double*>(p)));
-
-            auto res = (der[0][1] ^ der[1][0]);
-
-            OpenMesh::Vec3d n = OpenMesh::Vec3d(res.x, res.y, res.z);
-            mesh.set_normal(vertex, n.normalize());
-            mesh.data(vertex).mean = mean(der, n.normalize());
-            handles.push_back(vertex);
-        }
-    }
-    for (size_t i = 0; i < resolution - 1; ++i)
-        for (size_t j = 0; j < resolution - 1; ++j) {
-            tri.clear();
-            tri.push_back(handles[i * resolution + j]);
-            tri.push_back(handles[i * resolution + j + 1]);
-            tri.push_back(handles[(i + 1) * resolution + j]);
-            mesh.add_face(tri);
-            tri.clear();
-            tri.push_back(handles[(i + 1) * resolution + j]);
-            tri.push_back(handles[i * resolution + j + 1]);
-            tri.push_back(handles[(i + 1) * resolution + j + 1]);
-            mesh.add_face(tri);
-        }
-}
 
 
 
@@ -874,7 +671,7 @@ void MyViewer::keyPressEvent(QKeyEvent *e) {
     auto* vb = new QVBoxLayout;
     QLabel* text;
     int sizek; 
-    Tree* to = sk.searchbyid(sk, selected_vertex);
+
   if (e->modifiers() == Qt::NoModifier)
 
     switch (e->key()) {
@@ -951,8 +748,8 @@ void MyViewer::keyPressEvent(QKeyEvent *e) {
       update();
       break;
     case Qt::Key_L:
-      //visualization = Visualization::SLICING;
-      gen();
+      visualization = Visualization::SLICING;
+ 
       update();
       break;
     case Qt::Key_V:
@@ -960,14 +757,7 @@ void MyViewer::keyPressEvent(QKeyEvent *e) {
         //transparent = !transparent;
         update();
         break;
-    case Qt::Key_5:
-        //ani = true;
-
-        sk.change_all_rotason(*to, to->point, -rotation);
-        startAnimation();
-        //animate();
-        update();
-        break;
+ 
     case Qt::Key_I:
       //visualization = Visualization::ISOPHOTES;
       model_type = ModelType::INVERZ;
@@ -1011,47 +801,9 @@ void MyViewer::keyPressEvent(QKeyEvent *e) {
       update();
       break;
 
-    case Qt::Key_T:
-        if (points.size() != 0 && mesh.n_vertices() != 0)
-        {
+    
 
-            weigh();
-        }
-        update();
-        break;
-    case Qt::Key_2:
-
-        if (points.size() != 0 && mesh.n_vertices() != 0)
-        {
-            
-            
-            if (isweight == true && mehet == true)
-            {
-                visualization = Visualization::WEIGH2;
-                Smooth();
-                model_type = ModelType::SKELTON;
-               
-                 text = new QLabel(tr("Success"));
-
-            }
-            else
-            {
-                text = new QLabel(tr("Error: No weight in the mesh"));
-            }
-        }
-        else
-        {
-            text = new QLabel(tr("Error: No mesh or skellton" ));
-        }
-        hb1->addWidget(text);
-        vb->addLayout(hb1);
-        dlg->setWindowTitle(tr("Message"));
-        dlg->setLayout(vb);
-        if (dlg->exec() == QDialog::Accepted) {
-            update();
-        }
-        //mehet = false;
-        break;
+   
     
 
     case Qt::Key_3:
@@ -1096,11 +848,7 @@ void MyViewer::keyPressEvent(QKeyEvent *e) {
       update();
       break;
     case Qt::Key_X:
-        fullnes();
-        //homework();
-        //QMessageBox();
-        //QMessageBox::information(this, "Median", "Median of Array: " + QString::number(median_of_area));
-        updateMesh();
+
         update();
         break;
     default:
@@ -1214,18 +962,14 @@ void MyViewer::mouseMoveEvent(QMouseEvent *e) {
   if (model_type == ModelType::BEZIER_SURFACE)
     control_points[selected_vertex] = axes.position;
 
-  if (model_type == ModelType::Bspline)
-      bs.control_points[selected_vertex] = axes.position;
+ 
 
 
 
   if (model_type == ModelType::INVERZ)
   {
       target.position = axes.position;
-      inverse_kinematics(target, sk);
       double size = Edgecolleps.size() / 5;
-
-      /*
 
       for (int i = 0; i < size; i++)
       {
@@ -1243,8 +987,7 @@ void MyViewer::mouseMoveEvent(QMouseEvent *e) {
 
       }
       std::vector<int> remov;
-     // while(is_still_ok())
-      { 
+
       for (int i = use.size() - 1; i >= 0; i--)
       {
           auto pd = use[i].p;
@@ -1272,79 +1015,17 @@ void MyViewer::mouseMoveEvent(QMouseEvent *e) {
           }
 
       }
-      for(auto i : remov)
-      {
-          //use.erase(use.begin() + i);
-      }
-      
-      }*/
-  }
-
-  if (model_type == ModelType::SKELTON)
-  {
-      /*
-      * 
-      * megkersük a kiválasztot ágakat
-      */
 
       
-      Tree* to = sk.searchbyid(sk, selected_vertex);
-      int des = -1;
-      getallpoints(*to);
-      std::vector<Vec> old = selected_points_storage;
-      selected_points_storage.clear();
-      sk.change_all_position(*to, axes.position - old_pos);
-      Vec dif = axes.position - old_pos;
-      getallpoints(*to);
-      
-      std::vector<Vec> newp = selected_points_storage;
-      selected_points_storage.clear();
-      for (int i = 0; i < b.size(); i++)
-      {
-          for (int j = 0; j < old.size(); j++)
-          {
-              if (b[i].start == old[j])
-              {
-                  b[i].start = newp[j];
-                  des = i;
-              }
-              if (b[i].End == old[j])
-              {
-                  b[i].End = newp[j];
-              }
-          }
-          if (des != -1)
-          {
-
-              OpenMesh::Vec3d diffrents = OpenMesh::Vec3d(dif.x, dif.y, dif.z);
-              if (isweight)
-              {
-                  for (auto v : mesh.vertices())
-                  {
-                      mesh.point(v) += diffrents * mesh.data(v).weigh[des];
-
-                  }
-                  des = -1;
-              }
-          }
-
-      }
-      newp.clear();
-      old.clear();
       
   }
+
+  
   //updateMesh();
   update();
 }
 
-void MyViewer::getallpoints(Tree t)
-{
-    selected_points_storage.push_back(t.point);
-    for (int i = 0; i < t.child.size(); i++)
-    {
-        getallpoints(t.child[i]);
-    }
-}
+
 
 
 bool MyViewer::is_still_ok()
@@ -1367,18 +1048,7 @@ bool MyViewer::is_still_ok()
 }
 
 
-void MyViewer::get_change_points(Tree t)
-{
-    if (t.used)
-    {
-        selected_points_storage.push_back(t.point);
-    }
-    
-    for (int i = 0; i < t.child.size(); i++)
-    {
-        get_change_points(t.child[i]);
-    }
-}
+
 
 
 QString MyViewer::helpString() const {
