@@ -245,25 +245,21 @@ private:
         int id;
         float error;
         MyMesh::HalfedgeHandle h;
-        std::vector<MyMesh::FaceHandle> conected;
         MyMesh::VertexHandle v;
         MyMesh::VertexHandle v2;
         MyMesh::Point p;
         MyMesh::Point p_deleted;
         std::vector<MyMesh::VertexHandle> vh;
-        std::vector<MyMesh::Point> po;
         MyMesh::VertexHandle vl;
         MyMesh::VertexHandle vr;
         bool used = false;
 
-        Ecolleps(int id_, float error_, MyMesh::HalfedgeHandle h_,
-            std::vector<MyMesh::FaceHandle> _conected, MyMesh::VertexHandle _v,
+        Ecolleps(int id_, float error_, MyMesh::HalfedgeHandle h_, MyMesh::VertexHandle _v,
             MyMesh::Point _v2, MyMesh::Point _p, std::vector<MyMesh::VertexHandle> _vh)
         {
             id = id_;
             error = error_;
             h = h_;
-            conected = _conected;
             v = _v;
             p = _v2;
             p_deleted = _p;
@@ -462,15 +458,6 @@ private:
     void putVertexes(MyMesh::VertexHandle p1, MyMesh::VertexHandle p2, int i);
 
     MyMesh::Point nt;
-    std::vector<MyMesh::FaceHandle> connacted_faces(MyMesh::VertexHandle v)
-    {
-        std::vector<MyMesh::FaceHandle> conected;
-        for (MyMesh::VertexFaceIter vf_it = mesh.vf_iter(v); vf_it.is_valid(); ++vf_it) {
-            MyMesh::FaceHandle face_handle = *vf_it;
-            conected.push_back(face_handle);
-        }
-        return conected;
-    }
     MyMesh::Point roundPoint(MyMesh::Point p)
     {
         float x = p[0];
