@@ -9,6 +9,16 @@ float MyViewer::ErrorDistance(MyMesh::VertexHandle p1, MyMesh::VertexHandle p2, 
     return result;
 }
 
+float MyViewer::Calculate_spline(MyMesh::VertexHandle p1, MyMesh::Point newp)
+{
+    float result = 0.0f;
+    for (MyMesh::VertexFaceIter vf_it = mesh.vf_iter(p1); vf_it.is_valid(); ++vf_it) {
+        MyMesh::Point p = roundPoint(mesh.point(p1));
+
+    }
+    return result;
+}
+
 float MyViewer::Calculate_Min(MyMesh::VertexHandle p1, MyMesh::Point newp)
 {
     std::vector<float> min;
@@ -25,6 +35,7 @@ float MyViewer::Calculate_Min(MyMesh::VertexHandle p1, MyMesh::Point newp)
     auto result = std::min_element(min.begin(), min.end());
 
     return *result;
+
 }
 
 void MyViewer::collapseEdge(MyMesh::HalfedgeHandle h, int i)

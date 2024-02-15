@@ -274,7 +274,7 @@ private:
 
  
 
-
+    float Calculate_spline(MyMesh::VertexHandle p1, MyMesh::Point newp);
 
 
     bool _homework = false;
