@@ -1,6 +1,6 @@
 # Result:
 
-![Alt text](https://github.com/Haragos99/BSplineSurface/raw/main/source/pictures/Bspline1.png](https://github.com/Haragos99/ProgressiveMesh/blob/main/pictures/mesh3.png))
+![Alt text](https://github.com/Haragos99/ProgressiveMesh/blob/main/pictures/mesh3.png)
 
 
 # Usage
