@@ -1,6 +1,6 @@
 # Description
 
-- H. Hoppe: Progressive meshes and H. Hoppe: Efficient implementation of progressive meshes
+- [H. Hoppe: Progressive meshes](https://dl.acm.org/doi/10.1145/237170.237216) and [H. Hoppe: Efficient implementation of progressive meshes](https://www.sciencedirect.com/science/article/abs/pii/S0097849397000812?via%3Dihub)
 - Load high resolution mesh
 - User controlled global simplification and reset
 - Simplification by point of view
