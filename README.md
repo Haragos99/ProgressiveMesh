@@ -1,9 +1,9 @@
 # Description
 
-H. Hoppe: Progressive meshes and H. Hoppe: Efficient implementation of progressive meshes
-Load high resolution mesh
-User controlled global simplification and reset
-Simplification by point of view
+- H. Hoppe: Progressive meshes and H. Hoppe: Efficient implementation of progressive meshes
+- Load high resolution mesh
+- User controlled global simplification and reset
+- Simplification by point of view
 
 # Result:
 
